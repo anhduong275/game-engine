@@ -18,6 +18,7 @@
 // #include <glm/gtc/matrix_transform.hpp>
 
 #include "utils/utils.hh"
+#include "utils/errorhandler.hh"
 
 using namespace std;
 using namespace glm;
@@ -93,21 +94,41 @@ int main() {
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
  
     const GLuint vertex_shader = glCreateShader(GL_VERTEX_SHADER);
+    if (!vertex_shader) {
+        cerr << "Anh: Could not generate vertex shader object!" << endl;
+    }
     glShaderSource(vertex_shader, 1, &vertex_shader_text, NULL);
     glCompileShader(vertex_shader);
  
     const GLuint fragment_shader = glCreateShader(GL_FRAGMENT_SHADER);
+    if (!fragment_shader) {
+        cerr << "Anh: Could not generate fragment shader object!" << endl;
+    }
     glShaderSource(fragment_shader, 1, &fragment_shader_text, NULL);
     glCompileShader(fragment_shader);
  
     const GLuint program = glCreateProgram();
+    if (!program) {
+        cerr << "Anh: Could not generate program object!" << endl;
+    }
     glAttachShader(program, vertex_shader);
     glAttachShader(program, fragment_shader);
     glLinkProgram(program);
+
+    ErrorHandler::glCheckError();
  
     const GLint mvp_location = glGetUniformLocation(program, "MVP");
     const GLint vpos_location = glGetAttribLocation(program, "vPos");
     const GLint vcol_location = glGetAttribLocation(program, "vCol");
+    if (mvp_location == -1) {
+        cerr << "Anh: mvp_location Invalid names!" << endl;
+    }
+    if (vpos_location == -1) {
+        cerr << "Anh: vpos_location Invalid names!" << endl;
+    }
+    if (vcol_location == -1) {
+        cerr << "Anh: vcol_location Invalid names!" << endl;
+    }
  
     GLuint vertex_array;
     glGenVertexArrays(1, &vertex_array);
@@ -119,6 +140,8 @@ int main() {
     glVertexAttribPointer(vcol_location, 3, GL_FLOAT, GL_FALSE,
                           sizeof(Vertex), (void*) offsetof(Vertex, col));
     //_____________________ triangle stuff
+
+    glClearColor(1.f, 0.f, 0.f, 1.f);
 
     cout << "Start creating window!" << endl;
     // engine logic
